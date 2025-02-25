@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+
+    .container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 60%;
+        max-width: 450px;
+        text-align: center;
+        animation: fadeIn 1s ease-in-out;
+    }
+
+    h1 {
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
+    .status {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 10px;
+        border-radius: 6px;
+        margin: 8px 0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+        font-size: 16px;
+    }
+
+        .status:hover {
+            transform: scale(1.05);
+        }
+
+    span {
+        font-weight: bold;
+        color: #ffcc00;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .status a {
+        color: #ffcc00;
+        text-decoration: none;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+    }
+
+    .status a:hover {
+        text-decoration: underline;
+    }
+</style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мониторинг сервера</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Мониторинг сервера</h1>
+        <div class="status"><p><strong>Состояние сервера:</strong> <span id="status">—</span></p></div>
+        <div class="status"><p><strong>IP сервера:</strong> <span id="ip">—</span></p></div>
+        <div class="status"><p><strong>Время работы:</strong> <span id="uptime">—</span></p></div>
+        <div class="status"><p><strong>Загрузка CPU:</strong> <span id="cpu">—</span></p></div>
+        <div class="status"><p><strong>Свободная память (RAM):</strong> <span id="ram">—</span></p></div>
+        <div class="status"><p><strong>Диск (C:):</strong> <span id="disk">—</span></p></div>
+    </div>
+
+    <script>
+        async function updateData() {
+            try {
+                const res = await fetch('/data');
+                if (!res.ok) throw new Error(`Ошибка HTTP: ${res.status}`);
+
+                const data = await res.json();
+                console.log("Данные от сервера:", data);
+
+                ["cpu", "ram", "status", "uptime", "disk", "ip"].forEach(id => {
+                    if (data[id]) document.getElementById(id).innerText = data[id];
+                });
+
+            } catch (err) {
+                console.error("Ошибка загрузки данных:", err);
+            } finally {
+                setTimeout(updateData, 1000);
+            }
+        }
+
+        updateData();
+    </script>
+</body>
+</html>
+

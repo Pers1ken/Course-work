@@ -1,0 +1,7 @@
+﻿  system_info.cpp
+C:\курсовая работа\system_info.cpp(33,15): warning C4244: инициализация: преобразование "_Rep" в "int", возможна потеря данных
+C:\курсовая работа\system_info.cpp(33,15): warning C4244:         with
+C:\курсовая работа\system_info.cpp(33,15): warning C4244:         [
+C:\курсовая работа\system_info.cpp(33,15): warning C4244:             _Rep=__int64
+C:\курсовая работа\system_info.cpp(33,15): warning C4244:         ]
+  курсовая работа.vcxproj -> C:\курсовая работа\x64\Debug\курсовая работа.exe
