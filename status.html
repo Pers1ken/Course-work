@@ -1,112 +1,214 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
-<style>
-    body {
-        font-family: 'Arial', sans-serif;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: #fff;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-    }
-
-    .container {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        padding: 15px;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        width: 60%;
-        max-width: 450px;
-        text-align: center;
-        animation: fadeIn 1s ease-in-out;
-    }
-
-    h1 {
-        font-size: 28px;
-        margin-bottom: 20px;
-    }
-
-    .status {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 10px;
-        border-radius: 6px;
-        margin: 8px 0;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s;
-        font-size: 16px;
-    }
-
-        .status:hover {
-            transform: scale(1.05);
-        }
-
-    span {
-        font-weight: bold;
-        color: #ffcc00;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    .status a {
-        color: #ffcc00;
-        text-decoration: none;
-        font-weight: bold;
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-    }
-
-    .status a:hover {
-        text-decoration: underline;
-    }
-</style>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Мониторинг сервера</title>
-    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            margin-top: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .block {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 16px;
+            border-radius: 10px;
+            margin: 12px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+            .block:hover {
+                transform: scale(1.01);
+            }
+
+            .block p {
+                margin: 0 0 10px 0;
+                font-size: 16px;
+            }
+
+        span {
+            font-weight: bold;
+            color: #ffcc00;
+        }
+
+        canvas {
+            background: #fff;
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 100%;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            transform: translateX(120%);
+            transition: transform 0.5s ease;
+            z-index: 9999;
+            font-weight: bold;
+        }
+
+            #notification.show {
+                transform: translateX(0);
+            }
+    </style>
 </head>
 <body>
+    <!-- Уведомление -->
+    <div id="notification">Внимание: нагрузка CPU выше 80%</div>
+
     <div class="container">
         <h1>Мониторинг сервера</h1>
-        <div class="status"><p><strong>Состояние сервера:</strong> <span id="status">—</span></p></div>
-        <div class="status"><p><strong>IP сервера:</strong> <span id="ip">—</span></p></div>
-        <div class="status"><p><strong>Время работы:</strong> <span id="uptime">—</span></p></div>
-        <div class="status"><p><strong>Загрузка CPU:</strong> <span id="cpu">—</span></p></div>
-        <div class="status"><p><strong>Свободная память (RAM):</strong> <span id="ram">—</span></p></div>
-        <div class="status"><p><strong>Диск (C:):</strong> <span id="disk">—</span></p></div>
+
+        <div class="block"><p><strong>Состояние сервера:</strong> <span id="status">—</span></p></div>
+        <div class="block"><p><strong>IP сервера:</strong> <span id="ip">—</span></p></div>
+        <div class="block"><p><strong>Время работы:</strong> <span id="uptime">—</span></p></div>
+
+        <div class="block">
+            <p><strong>Загрузка CPU:</strong> <span id="cpu">—</span></p>
+            <canvas id="cpuChart" height="140"></canvas>
+        </div>
+
+        <div class="block">
+            <p><strong>Свободная память (RAM):</strong> <span id="ram">—</span></p>
+            <canvas id="ramChart" height="140"></canvas>
+        </div>
+
+        <div class="block"><p><strong>Диск (C:):</strong> <span id="disk">—</span></p></div>
     </div>
 
     <script>
+        const maxPoints = 30;
+        const cpuData = [], ramData = [], diskData = [];
+
+        const cpuChart = new Chart(document.getElementById('cpuChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Загрузка CPU (%)',
+                    data: [],
+                    borderColor: 'rgba(255, 204, 0, 1)',
+                    backgroundColor: 'rgba(255, 204, 0, 0.2)',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { min: 0, max: 100 } }
+            }
+        });
+
+        const ramChart = new Chart(document.getElementById('ramChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Использование RAM (ГБ)',
+                    data: [],
+                    borderColor: 'rgba(72, 219, 251, 1)',
+                    backgroundColor: 'rgba(72, 219, 251, 0.2)',
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        function pushData(chart, arr, val) {
+            const now = new Date().toLocaleTimeString();
+            if (arr.length >= maxPoints) {
+                arr.shift();
+                chart.data.labels.shift();
+            }
+            arr.push(val);
+            chart.data.labels.push(now);
+            chart.data.datasets[0].data = [...arr];
+            chart.update();
+        }
+
+        function toggleNotification(show) {
+            const notification = document.getElementById("notification");
+            if (show) {
+                notification.classList.add("show");
+            } else {
+                notification.classList.remove("show");
+            }
+        }
+
         async function updateData() {
             try {
                 const res = await fetch('/data');
-                if (!res.ok) throw new Error(`Ошибка HTTP: ${res.status}`);
-
                 const data = await res.json();
-                console.log("Данные от сервера:", data);
 
-                ["cpu", "ram", "status", "uptime", "disk", "ip"].forEach(id => {
-                    if (data[id]) document.getElementById(id).innerText = data[id];
-                });
+                document.getElementById("status").innerText = data.status;
+                document.getElementById("ip").innerText = data.ip;
+                document.getElementById("uptime").innerText = data.uptime;
+                document.getElementById("cpu").innerText = data.cpu;
+                document.getElementById("ram").innerText = data.ram;
+                document.getElementById("disk").innerText = data.disk;
+
+                const cpuVal = parseFloat(data.cpu.split(" ")[0]);
+                const ramVal = parseFloat(data.ram.split(" ")[0]);
+                const diskVal = parseFloat(data.disk.split(" ")[0]);
+
+                pushData(cpuChart, cpuData, cpuVal);
+                pushData(ramChart, ramData, ramVal);
+
+                toggleNotification(cpuVal > 80);
 
             } catch (err) {
                 console.error("Ошибка загрузки данных:", err);
             } finally {
-                setTimeout(updateData, 1000);
+                setTimeout(updateData, 2000);
             }
         }
 
@@ -114,4 +216,3 @@
     </script>
 </body>
 </html>
-

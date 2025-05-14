@@ -6,6 +6,9 @@
 #include <chrono>
 #include <thread>
 #include <string>
+#include <curl/curl.h> 
+#include <fstream>
+#include <ctime>
 
 static ULONGLONG prevIdleTime = 0, prevKernelTime = 0, prevUserTime = 0;
 static auto startTime = std::chrono::steady_clock::now();
@@ -53,7 +56,7 @@ std::string wstringToUtf8(const std::wstring& wstr) {
 
     if (size_needed <= 1) return "";
 
-    std::string strTo(size_needed - 1, 0); 
+    std::string strTo(size_needed - 1, 0);
     WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &strTo[0], size_needed, nullptr, nullptr);
 
     strTo.erase(std::find(strTo.begin(), strTo.end(), '\0'), strTo.end());
@@ -95,7 +98,7 @@ std::string getCpuUsage() {
         prevUserTime = user;
 
         double cpuUsage = totalSystem ? 100.0 * (1.0 - (double)totalIdle / totalSystem) : 0.0;
-        cpuUsage *= 2.0; 
+        cpuUsage *= 2.0;
         if (cpuUsage > 100.0) cpuUsage = 100.0;
 
         std::ostringstream oss;
@@ -134,3 +137,51 @@ std::string getDiskStatus() {
     return oss.str();
 }
 
+void logSystemData(const std::string& data) {
+    std::ofstream logFile("server_log.txt", std::ios::app);
+    if (logFile.is_open()) {
+        auto now = std::chrono::system_clock::now();
+        std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+
+        std::tm tm;
+        localtime_s(&tm, &now_time);
+
+        char timeStr[20];
+        std::strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", &tm);
+
+        logFile << "[" << timeStr << "] " << data << "\n";
+        logFile.close();
+    }
+    else {
+        std::cerr << "Ошибка открытия файла лога\n";
+    }
+}
+
+void sendTelegramNotification(const std::string& message) {
+    const std::string token = "";
+    const std::string chat_id = "";
+
+    const std::string url = "https://api.telegram.org/bot" + token + "/sendMessage";
+
+    const std::string payload = "chat_id=" + chat_id + "&text=" + message;
+
+    CURL* curl = curl_easy_init();
+    if (curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
+
+        CURLcode res = curl_easy_perform(curl);
+
+        if (res != CURLE_OK) {
+            std::cerr << "Ошибка отправки сообщения в Telegram: " << curl_easy_strerror(res) << std::endl;
+        }
+        else {
+            std::cout << "Сообщение успешно отправлено!" << std::endl;
+        }
+
+        curl_easy_cleanup(curl);
+    }
+    else {
+        std::cerr << "Ошибка инициализации CURL!" << std::endl;
+    }
+}

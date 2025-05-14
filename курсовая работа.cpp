@@ -7,6 +7,9 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
+bool alertSent = false;
+
+
 std::string loadHtml(const std::string& filename) {
     std::ifstream file(filename);
     if (!file) return "<h1>Ошибка: Не найден " + filename + "</h1>";
@@ -40,14 +43,49 @@ std::string loadHtml(const std::string& filename) {
 
 std::string getJsonStatus() {
     std::string uptime = getUptime();
-    if (uptime.empty()) uptime = "Загрузка..."; 
+    if (uptime.empty()) uptime = "Загрузка...";
 
-    return "{\"cpu\":\"" + getCpuUsage() +
-        "\", \"ram\":\"" + getMemoryStatus() +
-        "\", \"disk\":\"" + getDiskStatus() +
-        "\", \"ip\":\"" + getServerAddress() +
-        "\", \"status\":\"" + getServerStatus() +
+    std::string cpuStr = getCpuUsage();
+    std::string ram = getMemoryStatus();
+    std::string disk = getDiskStatus();
+    std::string ip = getServerAddress();
+    std::string status = getServerStatus();
+
+    float cpuVal = 0.0f;
+    try {
+        cpuVal = std::stof(cpuStr.substr(0, cpuStr.find(' ')));
+    }
+    catch (...) {
+        cpuVal = 0.0f;
+    }
+
+    std::cout << "CPU usage: " << cpuVal << "%" << std::endl;
+
+    if (cpuVal > 80.0f) {
+        if (!alertSent) {
+            std::cout << "Sending notification about high CPU usage." << std::endl;
+            sendTelegramNotification("Attention! High CPU usage: " + cpuStr);
+            alertSent = true;
+        }
+    }
+    else {
+        if (alertSent) {
+            std::cout << "Sending notification about CPU usage returning to normal." << std::endl;
+            sendTelegramNotification("CPU usage has returned to normal: " + cpuStr);
+            alertSent = false;
+        }
+    }
+
+    std::string jsonData = "{\"cpu\":\"" + cpuStr +
+        "\", \"ram\":\"" + ram +
+        "\", \"disk\":\"" + disk +
+        "\", \"ip\":\"" + ip +
+        "\", \"status\":\"" + status +
         "\", \"uptime\":\"" + uptime + "\"}";
+
+    logSystemData(jsonData);
+
+    return jsonData;
 }
 
 int main() {

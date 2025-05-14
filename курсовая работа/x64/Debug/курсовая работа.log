@@ -1,7 +1,13 @@
 ﻿  system_info.cpp
-C:\курсовая работа\system_info.cpp(33,15): warning C4244: инициализация: преобразование "_Rep" в "int", возможна потеря данных
-C:\курсовая работа\system_info.cpp(33,15): warning C4244:         with
-C:\курсовая работа\system_info.cpp(33,15): warning C4244:         [
-C:\курсовая работа\system_info.cpp(33,15): warning C4244:             _Rep=__int64
-C:\курсовая работа\system_info.cpp(33,15): warning C4244:         ]
-  курсовая работа.vcxproj -> C:\курсовая работа\x64\Debug\курсовая работа.exe
+C:\Users\Андрей\Course-work\system_info.cpp(34,15): warning C4244: инициализация: преобразование "_Rep" в "int", возможна потеря данных
+C:\Users\Андрей\Course-work\system_info.cpp(34,15): warning C4244:         with
+C:\Users\Андрей\Course-work\system_info.cpp(34,15): warning C4244:         [
+C:\Users\Андрей\Course-work\system_info.cpp(34,15): warning C4244:             _Rep=__int64
+C:\Users\Андрей\Course-work\system_info.cpp(34,15): warning C4244:         ]
+  курсовая работа.cpp
+C:\Users\Андрей\Course-work\курсовая работа.cpp(130,59): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+  Создание кода...
+  LINK : не найден или не выполнена сборка C:\Users\Андрей\Course-work\x64\Debug\курсовая работа.exe при последней инкрементной компоновке; выполняется полная компоновка
+  курсовая работа.vcxproj -> C:\Users\Андрей\Course-work\x64\Debug\курсовая работа.exe
+  "pwsh.exe" не является внутренней или внешней
+  командой, исполняемой программой или пакетным файлом.
